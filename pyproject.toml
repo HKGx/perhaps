@@ -1,9 +1,17 @@
 [tool.poetry]
-name = "perhaps"
-version = "0.1.2"
-description = "Perhaps there is no data or perhaps there is"
 authors = ["HKGx <mail@hkgdoes.dev>"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+description = "Perhaps there is no data or perhaps there is"
+homepage = "https://github.com/HKGx/perhaps"
+keywords = ["maybe", "monad", "functional programming", "just", "some"]
+license = "MIT"
+name = "perhaps"
 readme = "README.md"
+repository = "https://github.com/HKGx/perhaps"
+version = "0.1.2"
 
 [tool.poetry.dependencies]
 python = "^3.8"
