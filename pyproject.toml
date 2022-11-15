@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "perhaps"
-version = "0.1.1"
+version = "0.1.2"
 description = "Perhaps there is no data or perhaps there is"
 authors = ["HKGx <mail@hkgdoes.dev>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8, <3.12"
+python = "^3.8"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
