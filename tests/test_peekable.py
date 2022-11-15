@@ -1,6 +1,6 @@
-import pytest
+from typing import Iterable, Iterator, TypeVar, Union
 
-from typing import Iterable, Iterator, TypeVar
+import pytest
 
 from perhaps import Just, Maybe, Nothing
 
@@ -11,7 +11,7 @@ class Peekable(Iterator[T]):
     current: Maybe[T]
     source: Iterator[T]
 
-    def __init__(self, source: Iterator[T] | Iterable[T]):
+    def __init__(self, source: Union[Iterator[T], Iterable[T]]):
         self.source = iter(source)
         self.current = Just(next(self.source))
 
