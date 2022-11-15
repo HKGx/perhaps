@@ -1,12 +1,22 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Generic, Never, NoReturn, Type, TypeVar, overload
+from typing import (
+    Callable,
+    Generic,
+    NoReturn,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 T = TypeVar("T")
 R = TypeVar("R")
 
 
 class Maybe(Generic[T], ABC):
-    value: T | Never
+    value: Union[T, NoReturn]
 
     @abstractmethod
     def map(self, f: Callable[[T], R]) -> "Maybe[R]":
@@ -18,21 +28,23 @@ class Maybe(Generic[T], ABC):
 
     @abstractmethod
     def unwrap(
-        self, f: Callable[[], Exception | Type[Exception]] | None = None
-    ) -> T | NoReturn:
+        self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
+    ) -> Union[T, NoReturn]:
         ...
 
     @abstractmethod
-    def to_optional(self) -> T | None:
+    def to_optional(self) -> Optional[T]:
         ...
 
     @classmethod
-    def from_optional(cls, value: T | None) -> "Maybe[T]":
+    def from_optional(cls, value: Optional[T]) -> "Maybe[T]":
         return Just(value) if value is not None else Nothing()
 
     @classmethod
     def from_try(
-        cls, f: Callable[[], T], exc: Type[Exception] | tuple[Type[Exception], ...] = ()
+        cls,
+        f: Callable[[], T],
+        exc: Union[Type[Exception], Tuple[Type[Exception], ...]] = (),
     ) -> "Maybe[T]":
         try:
             return Just(f())
@@ -40,11 +52,11 @@ class Maybe(Generic[T], ABC):
             return Nothing()
 
     @abstractmethod
-    def __and__(self, other: "Maybe[R]") -> "Maybe[T] | Maybe[R]":
+    def __and__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
         ...
 
     @abstractmethod
-    def __or__(self, other: "Maybe[R]") -> "Maybe[T] | Maybe[R]":
+    def __or__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
         ...
 
     @abstractmethod
@@ -70,7 +82,9 @@ class Just(Generic[T], Maybe[T]):
     def or_else(self, f: Callable[[], T]) -> T:
         return self.value
 
-    def unwrap(self, f: Callable[[], Exception | Type[Exception]] | None = None) -> T:
+    def unwrap(
+        self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
+    ) -> T:
         return self.value
 
     def to_optional(self) -> T:
@@ -84,7 +98,7 @@ class Just(Generic[T], Maybe[T]):
     def __and__(self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
-    def __and__(self, other: "Maybe[R]") -> "Maybe[T] | Maybe[R]":
+    def __and__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
         return other
 
     @overload
@@ -95,7 +109,7 @@ class Just(Generic[T], Maybe[T]):
     def __or__(self, other: "Nothing") -> "Just[T]":
         ...
 
-    def __or__(self, other: "Maybe[R]") -> "Maybe[T] | Maybe[R]":
+    def __or__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
         return self
 
     def __eq__(self, other: object) -> bool:
@@ -115,13 +129,13 @@ class Nothing(Generic[T], Maybe[T]):
         return f()
 
     def unwrap(
-        self, f: Callable[[], Exception | Type[Exception]] | None = None
+        self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
     ) -> NoReturn:
         if f:
             raise f()
         raise ValueError("Tried to unwrap Nothing")
 
-    def to_optional(self) -> T | None:
+    def to_optional(self) -> None:
         return None
 
     @overload
@@ -132,7 +146,7 @@ class Nothing(Generic[T], Maybe[T]):
     def __and__(self, other: "Nothing") -> "Nothing[T]":
         ...
 
-    def __and__(self, other: "Maybe[R]") -> "Maybe[T] | Maybe[R]":
+    def __and__(self, other: "Maybe[R]") -> Union["Nothing[T]", "Maybe[R]"]:
         return self
 
     @overload
@@ -143,7 +157,7 @@ class Nothing(Generic[T], Maybe[T]):
     def __or__(self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
-    def __or__(self, other: "Maybe[R]") -> "Nothing[T] | Maybe[R]":
+    def __or__(self, other: "Maybe[R]") -> Union["Nothing[T]", "Maybe[R]"]:
         return other
 
     def __eq__(self, other: object) -> bool:
@@ -151,5 +165,3 @@ class Nothing(Generic[T], Maybe[T]):
 
     def __repr__(self) -> str:
         return "Nothing()"
-
-
