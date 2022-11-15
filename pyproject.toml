@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "perhaps"
 version = "0.1.0"
-description = ""
+description = "Perhaps there is no data or perhaps there is"
 authors = ["HKGx <mail@hkgdoes.dev>"]
 readme = "README.md"
 
