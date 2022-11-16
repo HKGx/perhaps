@@ -24,6 +24,20 @@ def test_map():
     assert Nothing().map(lambda x: x + 1) == Nothing()
 
 
+def test_bind():
+    assert Just(1).bind(lambda x: Just(x + 1)) == Just(2)
+    assert Nothing().bind(lambda x: Just(x + 1)) == Nothing()
+
+
+def test_and_then():
+    assert Just(1).and_then(lambda x: Just(x + 1)) == Just(1).bind(
+        lambda x: Just(x + 1)
+    )
+    assert Nothing().and_then(lambda x: Just(x + 1)) == Nothing().bind(
+        lambda x: Just(x + 1)
+    )
+
+
 def test_and():
     assert Just(1) & Just(2) == Just(2)
     assert Just(1) & Nothing() == Nothing()
