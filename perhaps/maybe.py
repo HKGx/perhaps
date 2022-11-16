@@ -212,6 +212,10 @@ class Just(Generic[T], Maybe[T]):
     def __and__(self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
+    @overload
+    def __and__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
+        ...
+
     def __and__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
         return other
 
@@ -221,6 +225,10 @@ class Just(Generic[T], Maybe[T]):
 
     @overload
     def __or__(self, other: "Nothing") -> "Just[T]":
+        ...
+
+    @overload
+    def __or__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
         ...
 
     def __or__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
