@@ -84,3 +84,10 @@ def test_from_optional():
 def test_to_optional():
     assert Just(1).to_optional() == 1
     assert Nothing().to_optional() == None
+
+
+def test_is_operator():
+    assert Nothing() is Nothing()
+    assert Just(1) is not Just(1)
+    assert Just(1) is not Nothing()
+    assert Nothing() is not Just(1)

@@ -247,6 +247,13 @@ class Just(Generic[T], Maybe[T]):
 class Nothing(Generic[T], Maybe[T]):
     __match_args__ = ()
 
+    instance: Optional["Nothing[T]"] = None
+
+    def __new__(cls) -> "Nothing[T]":
+        if cls.instance is None:
+            cls.instance = super().__new__(cls)
+        return cls.instance
+
     def map(self, f: Callable[[T], R]) -> "Nothing[R]":
         return Nothing()
 
