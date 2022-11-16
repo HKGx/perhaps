@@ -35,6 +35,27 @@ class Maybe(Generic[T], ABC):
         ...
 
     @abstractmethod
+    def bind(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
+        """
+        Apply a function to the value of the Maybe, if it has one.
+
+        Analogous to the `Option::and_then` in Rust and the `bind` in Haskell.
+
+        >>> Just(1).bind(lambda x: Just(x + 1))
+        Just(2)
+        >>> Nothing().bind(lambda x: Just(x + 1))
+        Nothing()
+        """
+        ...
+
+    @abstractmethod
+    def and_then(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
+        """
+        Alias for `bind`.
+        """
+        ...
+
+    @abstractmethod
     def unwrap(
         self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
     ) -> Union[T, NoReturn]:
@@ -163,6 +184,12 @@ class Just(Generic[T], Maybe[T]):
     def map(self, f: Callable[[T], R]) -> "Just[R]":
         return Just(f(self.value))
 
+    def bind(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
+        return f(self.value)
+
+    def and_then(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
+        return self.bind(f)
+
     def unwrap(
         self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
     ) -> T:
@@ -214,6 +241,12 @@ class Nothing(Generic[T], Maybe[T]):
 
     def map(self, f: Callable[[T], R]) -> "Nothing[R]":
         return Nothing()
+
+    def bind(self, f: Callable[[T], "Maybe[R]"]) -> "Nothing[R]":
+        return Nothing()
+
+    def and_then(self, f: Callable[[T], "Maybe[R]"]) -> "Nothing[R]":
+        return self.bind(f)
 
     def unwrap(
         self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
