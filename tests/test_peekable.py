@@ -13,7 +13,7 @@ class Peekable(Iterator[T]):
 
     def __init__(self, source: Union[Iterator[T], Iterable[T]]):
         self.source = iter(source)
-        self.current = Just(next(self.source))
+        self.current = Maybe.from_try(lambda: next(self.source), StopIteration)
 
     def peek(self) -> Maybe[T]:
         return self.current
