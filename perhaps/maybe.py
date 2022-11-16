@@ -20,31 +20,94 @@ class Maybe(Generic[T], ABC):
 
     @abstractmethod
     def map(self, f: Callable[[T], R]) -> "Maybe[R]":
-        ...
+        """
+        Apply a function to the value of the Maybe, if it has one.
 
-    @abstractmethod
-    def or_else(self, f: Callable[[], T]) -> T:
+        Analogous to the `Option::map` in Rust.
+
+        >>> Just(1).map(lambda x: x + 1)
+        Just(2)
+        >>> Nothing().map(lambda x: x + 1)
+        Nothing()
+        >>> Maybe.from_optional(None).map(lambda x: x + 1)
+        Nothing()
+        """
         ...
 
     @abstractmethod
     def unwrap(
         self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
     ) -> Union[T, NoReturn]:
+        """
+        Unwrap the value, or raise an exception if it is Nothing.
+
+        Custom exceptions can be raised by passing a callable that returns an exception or exception type.
+
+        Analogous to `Option::unwrap` in Rust.
+
+        >>> Just(1).unwrap()
+        1
+        >>> Nothing().unwrap()
+        Traceback (most recent call last):
+            ...
+        ValueError: Tried to unwrap Nothing
+        """
         ...
 
     @abstractmethod
-    def unwrap_or(
-        self,
-        default: T,
-    ) -> T:
+    def unwrap_or(self, default: T) -> T:
+        """
+        Unwrap the value or return the default value.
+
+
+        Analogous to `Option::unwrap_or` in Rust.
+
+        >>> Just(1).unwrap_or(2)
+        1
+        >>> Nothing().unwrap_or(2)
+        2
+
+        """
+        ...
+
+    @abstractmethod
+    def unwrap_or_else(self, f: Callable[[], T]) -> T:
+        """
+        Unwrap the value or return the result of the function.
+        Allows for lazy evaluation of the default value.
+
+        Analogous to `Option::unwrap_or_else` in Rust.
+
+        >>> Nothing().unwrap_or_else(lambda: 1)
+        1
+        >>> Just(1).unwrap_or_else(lambda: 2)
+        1
+
+        """
         ...
 
     @abstractmethod
     def to_optional(self) -> Optional[T]:
+        """
+        Convert to an Optional.
+
+        >>> Just(1).to_optional()
+        1
+        >>> Nothing().to_optional()
+        None
+        """
         ...
 
     @classmethod
     def from_optional(cls, value: Optional[T]) -> "Maybe[T]":
+        """
+        Convert from an Optional.
+
+        >>> Maybe.from_optional(1)
+        Just(1)
+        >>> Maybe.from_optional(None)
+        Nothing()
+        """
         return Just(value) if value is not None else Nothing()
 
     @classmethod
@@ -53,6 +116,16 @@ class Maybe(Generic[T], ABC):
         f: Callable[[], T],
         exc: Union[Type[Exception], Tuple[Type[Exception], ...]],
     ) -> "Maybe[T]":
+        """
+        Convert from a function that may raise an exception.
+
+        Exception types can be passed as a tuple to catch multiple exceptions.
+
+        >>> Maybe.from_try(lambda: 1 / 1, ZeroDivisionError)
+        Just(1)
+        >>> Maybe.from_try(lambda: 1 / 0, ZeroDivisionError)
+        Nothing()
+        """
         try:
             return Just(f())
         except exc:
@@ -90,18 +163,15 @@ class Just(Generic[T], Maybe[T]):
     def map(self, f: Callable[[T], R]) -> "Just[R]":
         return Just(f(self.value))
 
-    def or_else(self, f: Callable[[], T]) -> T:
-        return self.value
-
     def unwrap(
         self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
     ) -> T:
         return self.value
 
-    def unwrap_or(
-        self,
-        default: T,
-    ) -> T:
+    def unwrap_or(self, default: T) -> T:
+        return self.value
+
+    def unwrap_or_else(self, f: Callable[[], T]) -> T:
         return self.value
 
     def to_optional(self) -> T:
@@ -145,9 +215,6 @@ class Nothing(Generic[T], Maybe[T]):
     def map(self, f: Callable[[T], R]) -> "Nothing[R]":
         return Nothing()
 
-    def or_else(self, f: Callable[[], T]) -> T:
-        return f()
-
     def unwrap(
         self, f: Optional[Callable[[], Union[Exception, Type[Exception]]]] = None
     ) -> NoReturn:
@@ -155,11 +222,11 @@ class Nothing(Generic[T], Maybe[T]):
             raise f()
         raise ValueError("Tried to unwrap Nothing")
 
-    def unwrap_or(
-        self,
-        default: T,
-    ) -> T:
+    def unwrap_or(self, default: T) -> T:
         return default
+
+    def unwrap_or_else(self, f: Callable[[], T]) -> T:
+        return f()
 
     def to_optional(self) -> None:
         return None

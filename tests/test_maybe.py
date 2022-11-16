@@ -14,9 +14,9 @@ def test_create_nothing():
     assert Nothing() != Just(1)
 
 
-def test_or_else():
-    assert Just(1).or_else(lambda: 2) == 1
-    assert Nothing().or_else(lambda: 2) == 2
+def test_unwrap_or_else():
+    assert Just(1).unwrap_or_else(lambda: 2) == 1
+    assert Nothing().unwrap_or_else(lambda: 2) == 2
 
 
 def test_map():
