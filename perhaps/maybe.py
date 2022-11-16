@@ -44,7 +44,7 @@ class Maybe(Generic[T], ABC):
     def from_try(
         cls,
         f: Callable[[], T],
-        exc: Union[Type[Exception], Tuple[Type[Exception], ...]] = (),
+        exc: Union[Type[Exception], Tuple[Type[Exception], ...]],
     ) -> "Maybe[T]":
         try:
             return Just(f())
@@ -61,6 +61,10 @@ class Maybe(Generic[T], ABC):
 
     @abstractmethod
     def __eq__(self, other: object) -> bool:
+        ...
+
+    @abstractmethod
+    def __bool__(self) -> bool:
         ...
 
     @abstractmethod
@@ -115,6 +119,9 @@ class Just(Generic[T], Maybe[T]):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Just) and self.value == other.value
 
+    def __bool__(self) -> bool:
+        return True
+
     def __repr__(self) -> str:
         return f"Just({self.value!r})"
 
@@ -143,11 +150,11 @@ class Nothing(Generic[T], Maybe[T]):
         ...
 
     @overload
-    def __and__(self, other: "Nothing") -> "Nothing[T]":
+    def __and__(self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
     def __and__(self, other: "Maybe[R]") -> Union["Nothing[T]", "Maybe[R]"]:
-        return self
+        return other if isinstance(other, Nothing) else self
 
     @overload
     def __or__(self, other: "Just[R]") -> "Just[R]":
@@ -162,6 +169,9 @@ class Nothing(Generic[T], Maybe[T]):
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Nothing)
+
+    def __bool__(self) -> bool:
+        return False
 
     def __repr__(self) -> str:
         return "Nothing()"
