@@ -52,6 +52,11 @@ def test_unwrap():
         Nothing().unwrap(lambda: TypeError("oops"))
 
 
+def test_unwrap_or():
+    assert Just(1).unwrap_or(2) == 1
+    assert Nothing().unwrap_or(2) == 2
+
+
 def test_from_try():
     assert Maybe.from_try(lambda: 1 / 1, ZeroDivisionError) == Just(1)
     assert Maybe.from_try(lambda: 1 / 0, ZeroDivisionError) == Nothing()

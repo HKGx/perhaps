@@ -33,6 +33,13 @@ class Maybe(Generic[T], ABC):
         ...
 
     @abstractmethod
+    def unwrap_or(
+        self,
+        default: T,
+    ) -> T:
+        ...
+
+    @abstractmethod
     def to_optional(self) -> Optional[T]:
         ...
 
@@ -91,6 +98,12 @@ class Just(Generic[T], Maybe[T]):
     ) -> T:
         return self.value
 
+    def unwrap_or(
+        self,
+        default: T,
+    ) -> T:
+        return self.value
+
     def to_optional(self) -> T:
         return self.value
 
@@ -141,6 +154,12 @@ class Nothing(Generic[T], Maybe[T]):
         if f:
             raise f()
         raise ValueError("Tried to unwrap Nothing")
+
+    def unwrap_or(
+        self,
+        default: T,
+    ) -> T:
+        return default
 
     def to_optional(self) -> None:
         return None
