@@ -33,3 +33,8 @@ def test_peekable_iterator():
     assert peekable.peek() == Just(3)
     assert next(peekable) == 3
     assert peekable.peek() == Nothing()
+
+
+def test_peekable_to_list():
+    peekable = Peekable([1, 2, 3])
+    assert list(peekable) == [1, 2, 3]
