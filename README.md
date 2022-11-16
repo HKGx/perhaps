@@ -1,3 +1,5 @@
+![PyPI](https://img.shields.io/pypi/v/perhaps?style=flat-square)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/perhaps?style=flat-square)
 # perhaps
 Save your time when dealing with data that *perhaps* may exist.
 
