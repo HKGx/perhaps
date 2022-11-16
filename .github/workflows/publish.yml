@@ -53,4 +53,4 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Build and publish package
         run: |
-          poetry publish --build --username=__token__ --pasword=${{ secrets.PYPI_API_TOKEN }}
+          poetry publish --build --username=__token__ --password=${{ secrets.PYPI_API_TOKEN }}
