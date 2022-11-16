@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import TypeVar, Iterator, Generic
+from typing import Generic, Iterator, TypeVar
 
-from perhaps import Maybe, Just, Nothing
-
+from perhaps import Just, Maybe, Nothing
 
 T = TypeVar("T")
 
@@ -40,18 +39,3 @@ class LinkedList(Generic[T], Iterator[Node[T]]):
 
     def __repr__(self) -> str:
         return f"LinkedList({self.head!r})"
-
-
-def main():
-    node_1 = Node("first")
-    node_2 = Node("second", parent=Just(node_1))
-    node_3 = Node("third", parent=Just(node_2))
-
-    llist = LinkedList(node_1)
-
-    for i in llist:
-        print(i.value)
-
-
-if __name__ == "__main__":
-    main()
