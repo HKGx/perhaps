@@ -51,7 +51,7 @@ class Maybe(Generic[T], ABC):
     @abstractmethod
     def and_then(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
         """
-        Alias for `bind`.
+        Alias for `bind` if you prefer the Rust naming.
         """
         ...
 
