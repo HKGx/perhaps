@@ -3,7 +3,7 @@ from typing import Tuple
 
 from .maybe import Just, Maybe, Nothing
 
-__version__ = version("perhaps")
+__version__ = version(__package__ or __name__)
 
 __all__: Tuple[str, ...] = (
     "Maybe",
