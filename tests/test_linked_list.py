@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Generic, Iterator, TypeVar
 
+import pytest
+
 from perhaps import Just, Maybe, Nothing
 
 T = TypeVar("T")
@@ -9,9 +11,9 @@ T = TypeVar("T")
 
 class Node(Generic[T]):
     value: T
-    next: Maybe[Node]
+    next: Maybe[Node[T]]
 
-    def __init__(self, value: T, parent: Maybe[Node] = Nothing()) -> None:
+    def __init__(self, value: T, parent: Maybe[Node[T]] = Nothing()) -> None:
         self.value = value
         self.next = Nothing()
 
@@ -39,3 +41,27 @@ class LinkedList(Generic[T], Iterator[Node[T]]):
 
     def __repr__(self) -> str:
         return f"LinkedList({self.head!r})"
+
+
+def test_nodes():
+    node1 = Node("first")
+    node2 = Node("second", parent=Just(node1))
+    node3 = Node("third", parent=Just(node2))
+
+    assert node1.next == Just(node2)
+    assert node2.next == Just(node3)
+    assert node3.next == Nothing()
+
+
+def test_linked_list():
+    node1 = Node("first")
+    node2 = Node("second", parent=Just(node1))
+    node3 = Node("third", parent=Just(node2))
+
+    llist = LinkedList(node1)
+
+    assert next(llist) == node1
+    assert next(llist) == node2
+    assert next(llist) == node3
+    with pytest.raises(StopIteration):
+        next(llist)
