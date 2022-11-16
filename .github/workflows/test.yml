@@ -43,5 +43,5 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Test with pytest
         run: |
-          poetry run pytest --cov --cov-report term-missing:skip-covered .
           poetry run pyright .
+          poetry run pytest --cov --cov-report term-missing:skip-covered .
