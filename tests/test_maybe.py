@@ -71,6 +71,12 @@ def test_unwrap_or():
     assert Nothing().unwrap_or(2) == 2
 
 
+def test_filter():
+    assert Just(1).filter(lambda x: x > 1) == Nothing()
+    assert Just(1).filter(lambda x: x < 1) == Nothing()
+    assert Just(1).filter(lambda x: x == 1) == Just(1)
+
+
 def test_from_try():
     assert Maybe.from_try(lambda: 1 / 1, ZeroDivisionError) == Just(1)
     assert Maybe.from_try(lambda: 1 / 0, ZeroDivisionError) == Nothing()

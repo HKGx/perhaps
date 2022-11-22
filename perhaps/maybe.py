@@ -108,6 +108,22 @@ class Maybe(Generic[T], ABC):
         ...
 
     @abstractmethod
+    def filter(self, f: Callable[[T], bool]) -> "Maybe[T]":
+        """
+        Filter the value of the Maybe, returning Nothing if the predicate returns False.
+
+        Analogous to `Option::filter` in Rust.
+
+        >>> Just(1).filter(lambda x: x > 1)
+        Nothing()
+        >>> Just(1).filter(lambda x: x < 1)
+        Nothing()
+        >>> Just(1).filter(lambda x: x == 1)
+        Just(1)
+        """
+        ...
+
+    @abstractmethod
     def to_optional(self) -> Optional[T]:
         """
         Convert to an Optional.
@@ -201,6 +217,9 @@ class Just(Generic[T], Maybe[T]):
     def unwrap_or_else(self, f: Callable[[], T]) -> T:
         return self.value
 
+    def filter(self, f: Callable[[T], bool]) -> Maybe[T]:
+        return self if f(self.value) else Nothing()
+
     def to_optional(self) -> T:
         return self.value
 
@@ -275,6 +294,9 @@ class Nothing(Generic[T], Maybe[T]):
 
     def unwrap_or_else(self, f: Callable[[], T]) -> T:
         return f()
+
+    def filter(self, f: Callable[[T], bool]) -> "Nothing[T]":
+        return Nothing()
 
     def to_optional(self) -> None:
         return None
