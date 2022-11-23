@@ -14,7 +14,7 @@ repository = "https://github.com/HKGx/perhaps"
 version = "0.4.4"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
@@ -32,4 +32,4 @@ build-backend = "poetry.core.masonry.api"
 profile = "black"
 
 [tool.pyright]
-pythonVersion = "3.8"
+pythonVersion = "3.10"
