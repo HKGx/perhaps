@@ -37,6 +37,8 @@ def test_lift2():
     maybe2 = cast(Maybe[int], Just(3))
     assert maybe1.lift2(lambda x, y: x + y, maybe2) == Nothing()
     assert maybe2.lift2(lambda x, y: x * y, maybe2) == Just(9)
+    assert maybe2.lift2(int.__add__, Just(4)) == Just(7)
+    assert Just("foo").lift2(str.__add__, Just("bar")) == Just("foobar")
 
 
 def test_bind():
