@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from sys import version_info
 from typing import (
     Callable,
     Generic,
@@ -6,6 +7,7 @@ from typing import (
     Optional,
     Tuple,
     Type,
+    TypeGuard,
     TypeVar,
     Union,
     overload,
@@ -130,6 +132,13 @@ class Maybe(Generic[T], ABC):
         ...
 
     @abstractmethod
+    def filter_typed(self, f: Callable[[T], TypeGuard[R]]) -> "Maybe[R]":
+        """
+        Filter the value of the Maybe, if it has one, based on a type guard.
+        """
+        ...
+
+    @abstractmethod
     def filter(self, f: Callable[[T], bool]) -> "Maybe[T]":
         """
         Filter the value of the Maybe, returning Nothing if the predicate returns False.
@@ -250,6 +259,11 @@ class Just(Generic[T], Maybe[T]):
     def unwrap_or_else(self, f: Callable[[], T]) -> T:
         return self.value
 
+    def filter_typed(self, f: Callable[[T], TypeGuard[R]]) -> Maybe[R]:
+        if f(self.value):
+            return Just(self.value)
+        return Nothing()
+
     def filter(self, f: Callable[[T], bool]) -> Maybe[T]:
         return self if f(self.value) else Nothing()
 
@@ -330,6 +344,9 @@ class Nothing(Generic[T], Maybe[T]):
 
     def unwrap_or_else(self, f: Callable[[], T]) -> T:
         return f()
+
+    def filter_typed(self, f: Callable[[T], TypeGuard[R]]) -> "Nothing[R]":
+        return Nothing()
 
     def filter(self, f: Callable[[T], bool]) -> "Nothing[T]":
         return Nothing()
