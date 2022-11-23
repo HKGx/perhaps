@@ -10,3 +10,5 @@
 *Perhaps won't offer any stable APIs before v1.0.0, but I'll do my best not to break too much things*
 
 ![A code screenshot showing example usage of perhaps](.github/code-snapshot.png)
+
+I will stop publishing so many requests now, if needed pull the package from this repository
