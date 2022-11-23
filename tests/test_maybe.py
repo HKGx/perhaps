@@ -1,3 +1,5 @@
+from typing import cast
+
 import pytest
 
 from perhaps import Just, Maybe, Nothing
@@ -22,6 +24,19 @@ def test_unwrap_or_else():
 def test_map():
     assert Just(1).map(lambda x: x + 1) == Just(2)
     assert Nothing().map(lambda x: x + 1) == Nothing()
+
+
+def test_lift2():
+    assert Just(1).lift2(lambda x, y: x + y, Just(2)) == Just(3)
+    assert (
+        Just(1).lift2(lambda x, y: x + y, Nothing[int]()) == Nothing()
+    )  # annotation for Nothing is required here, though most often it can be inferred
+    assert Nothing().lift2(lambda x, y: x + y, Just(2)) == Nothing()
+    maybe1 = cast(Maybe[int], Nothing())
+    assert maybe1.lift2(lambda x, y: x + y, Just(2)) == Nothing()
+    maybe2 = cast(Maybe[int], Just(3))
+    assert maybe1.lift2(lambda x, y: x + y, maybe2) == Nothing()
+    assert maybe2.lift2(lambda x, y: x * y, maybe2) == Just(9)
 
 
 def test_bind():

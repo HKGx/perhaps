@@ -13,6 +13,7 @@ from typing import (
 
 T = TypeVar("T")
 R = TypeVar("R")
+U = TypeVar("U")
 
 
 class Maybe(Generic[T], ABC):
@@ -31,6 +32,27 @@ class Maybe(Generic[T], ABC):
         Nothing()
         >>> Maybe.from_optional(None).map(lambda x: x + 1)
         Nothing()
+        """
+        ...
+
+    @abstractmethod
+    def lift2(self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
+        """
+        Given a function that takes two arguments, and another Maybe, apply the
+        function to the value of this Maybe and the other Maybe, if they both
+        have values.
+
+        Analogous to the `Option::zip_wth` in Rust and the `liftA2` in Haskell.
+
+        >>> Just(1).lift2(lambda x, y: x + y, Just(2))
+        Just(3)
+
+        >>> Just(1).lift2(lambda x, y: x + y, Nothing())
+        Nothing()
+
+        >>> Nothing().lift2(lambda x, y: x + y, Just(2))
+        Nothing()
+
         """
         ...
 
@@ -169,10 +191,6 @@ class Maybe(Generic[T], ABC):
             return Nothing()
 
     @abstractmethod
-    def __and__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
-        ...
-
-    @abstractmethod
     def __or__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
         ...
 
@@ -200,10 +218,25 @@ class Just(Generic[T], Maybe[T]):
     def map(self, f: Callable[[T], R]) -> "Just[R]":
         return Just(f(self.value))
 
-    def bind(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
+    @overload
+    def lift2(self, f: Callable[[T, R], U], other: "Just[R]") -> "Just[U]":
+        ...
+
+    @overload
+    def lift2(self, f: Callable[[T, R], U], other: "Nothing[R]") -> "Nothing[U]":
+        ...
+
+    @overload
+    def lift2(self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
+        ...
+
+    def lift2(self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
+        return other.map(lambda x: f(self.value, x))
+
+    def bind(self, f: Callable[[T], Maybe[R]]) -> Maybe[R]:
         return f(self.value)
 
-    def and_then(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
+    def and_then(self, f: Callable[[T], Maybe[R]]) -> Maybe[R]:
         return self.bind(f)
 
     def unwrap(
@@ -232,10 +265,10 @@ class Just(Generic[T], Maybe[T]):
         ...
 
     @overload
-    def __and__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
+    def __and__(self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
         ...
 
-    def __and__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
+    def __and__(self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
         return other
 
     @overload
@@ -247,10 +280,10 @@ class Just(Generic[T], Maybe[T]):
         ...
 
     @overload
-    def __or__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
+    def __or__(self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
         ...
 
-    def __or__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
+    def __or__(self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
         return self
 
     def __eq__(self, other: object) -> bool:
@@ -276,10 +309,13 @@ class Nothing(Generic[T], Maybe[T]):
     def map(self, f: Callable[[T], R]) -> "Nothing[R]":
         return Nothing()
 
-    def bind(self, f: Callable[[T], "Maybe[R]"]) -> "Nothing[R]":
+    def lift2(self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
         return Nothing()
 
-    def and_then(self, f: Callable[[T], "Maybe[R]"]) -> "Nothing[R]":
+    def bind(self, f: Callable[[T], Maybe[R]]) -> "Nothing[R]":
+        return Nothing()
+
+    def and_then(self, f: Callable[[T], Maybe[R]]) -> "Nothing[R]":
         return self.bind(f)
 
     def unwrap(
@@ -309,7 +345,7 @@ class Nothing(Generic[T], Maybe[T]):
     def __and__(self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
-    def __and__(self, other: "Maybe[R]") -> Union["Nothing[T]", "Maybe[R]"]:
+    def __and__(self, other: Maybe[R]) -> Union["Nothing[T]", Maybe[R]]:
         return other if isinstance(other, Nothing) else self
 
     @overload
@@ -320,7 +356,7 @@ class Nothing(Generic[T], Maybe[T]):
     def __or__(self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
-    def __or__(self, other: "Maybe[R]") -> Union["Nothing[T]", "Maybe[R]"]:
+    def __or__(self, other: Maybe[R]) -> Union["Nothing[T]", Maybe[R]]:
         return other
 
     def __eq__(self, other: object) -> bool:
