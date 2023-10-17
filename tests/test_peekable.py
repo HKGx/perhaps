@@ -1,13 +1,9 @@
-from typing import Iterable, Iterator, TypeVar, Union
-
-import pytest
+from typing import Iterable, Iterator, Union
 
 from perhaps import Just, Maybe, Nothing
 
-T = TypeVar("T")
 
-
-class Peekable(Iterator[T]):
+class Peekable[T](Iterator[T]):
     current: Maybe[T]
     source: Iterator[T]
 

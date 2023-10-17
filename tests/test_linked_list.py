@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Generic, Iterator, TypeVar
+from typing import Iterator
 
 import pytest
 
 from perhaps import Just, Maybe, Nothing
 
-T = TypeVar("T")
 
-
-class Node(Generic[T]):
+class Node[T]:
     value: T
     next: Maybe[Node[T]]
 
@@ -26,7 +24,7 @@ class Node(Generic[T]):
         return f"Node({self.value!r}) -> {self.next!r}"
 
 
-class LinkedList(Generic[T], Iterator[Node[T]]):
+class LinkedList[T](Iterator[Node[T]]):
     head: Node[T]
     current: Maybe[Node[T]]
 

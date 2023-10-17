@@ -1,28 +1,12 @@
 from abc import ABC, abstractmethod
-from sys import version_info
-from typing import (
-    Callable,
-    Generic,
-    NoReturn,
-    Optional,
-    Tuple,
-    Type,
-    TypeGuard,
-    TypeVar,
-    Union,
-    overload,
-)
-
-T = TypeVar("T")
-R = TypeVar("R")
-U = TypeVar("U")
+from typing import Callable, NoReturn, Optional, Tuple, Type, TypeGuard, Union, overload
 
 
-class Maybe(Generic[T], ABC):
+class Maybe[T](ABC):
     value: Union[T, NoReturn]
 
     @abstractmethod
-    def map(self, f: Callable[[T], R]) -> "Maybe[R]":
+    def map[R](self, f: Callable[[T], R]) -> "Maybe[R]":
         """
         Apply a function to the value of the Maybe, if it has one.
 
@@ -38,7 +22,7 @@ class Maybe(Generic[T], ABC):
         ...
 
     @abstractmethod
-    def lift2(self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
+    def lift2[R, U](self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
         """
         Given a function that takes two arguments, and another Maybe, apply the
         function to the value of this Maybe and the other Maybe, if they both
@@ -59,7 +43,7 @@ class Maybe(Generic[T], ABC):
         ...
 
     @abstractmethod
-    def bind(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
+    def bind[R](self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
         """
         Apply a function to the value of the Maybe, if it has one.
 
@@ -73,7 +57,7 @@ class Maybe(Generic[T], ABC):
         ...
 
     @abstractmethod
-    def and_then(self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
+    def and_then[R](self, f: Callable[[T], "Maybe[R]"]) -> "Maybe[R]":
         """
         Alias for `bind` if you prefer the Rust naming.
         """
@@ -132,7 +116,7 @@ class Maybe(Generic[T], ABC):
         ...
 
     @abstractmethod
-    def filter_typed(self, f: Callable[[T], TypeGuard[R]]) -> "Maybe[R]":
+    def filter_typed[R](self, f: Callable[[T], TypeGuard[R]]) -> "Maybe[R]":
         """
         Filter the value of the Maybe, if it has one, based on a type guard.
         """
@@ -200,7 +184,7 @@ class Maybe(Generic[T], ABC):
             return Nothing()
 
     @abstractmethod
-    def __or__(self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
+    def __or__[R](self, other: "Maybe[R]") -> Union["Maybe[T]", "Maybe[R]"]:
         ...
 
     @abstractmethod
@@ -216,7 +200,7 @@ class Maybe(Generic[T], ABC):
         ...
 
 
-class Just(Generic[T], Maybe[T]):
+class Just[T](Maybe[T]):
     __match_args__ = ("value",)
 
     value: T
@@ -224,28 +208,28 @@ class Just(Generic[T], Maybe[T]):
     def __init__(self, value: T):
         self.value = value
 
-    def map(self, f: Callable[[T], R]) -> "Just[R]":
+    def map[R](self, f: Callable[[T], R]) -> "Just[R]":
         return Just(f(self.value))
 
     @overload
-    def lift2(self, f: Callable[[T, R], U], other: "Just[R]") -> "Just[U]":
+    def lift2[R, U](self, f: Callable[[T, R], U], other: "Just[R]") -> "Just[U]":
         ...
 
     @overload
-    def lift2(self, f: Callable[[T, R], U], other: "Nothing[R]") -> "Nothing[U]":
+    def lift2[R, U](self, f: Callable[[T, R], U], other: "Nothing[R]") -> "Nothing[U]":
         ...
 
     @overload
-    def lift2(self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
+    def lift2[R, U](self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
         ...
 
-    def lift2(self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
+    def lift2[R, U](self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
         return other.map(lambda x: f(self.value, x))
 
-    def bind(self, f: Callable[[T], Maybe[R]]) -> Maybe[R]:
+    def bind[R](self, f: Callable[[T], Maybe[R]]) -> Maybe[R]:
         return f(self.value)
 
-    def and_then(self, f: Callable[[T], Maybe[R]]) -> Maybe[R]:
+    def and_then[R](self, f: Callable[[T], Maybe[R]]) -> Maybe[R]:
         return self.bind(f)
 
     def unwrap(
@@ -259,7 +243,7 @@ class Just(Generic[T], Maybe[T]):
     def unwrap_or_else(self, f: Callable[[], T]) -> T:
         return self.value
 
-    def filter_typed(self, f: Callable[[T], TypeGuard[R]]) -> Maybe[R]:
+    def filter_typed[R](self, f: Callable[[T], TypeGuard[R]]) -> Maybe[R]:
         if f(self.value):
             return Just(self.value)
         return Nothing()
@@ -271,18 +255,18 @@ class Just(Generic[T], Maybe[T]):
         return self.value
 
     @overload
-    def __and__(self, other: "Just[R]") -> "Just[R]":
+    def __and__[R](self, other: "Just[R]") -> "Just[R]":
         ...
 
     @overload
-    def __and__(self, other: "Nothing[R]") -> "Nothing[R]":
+    def __and__[R](self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
     @overload
-    def __and__(self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
+    def __and__[R](self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
         ...
 
-    def __and__(self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
+    def __and__[R](self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
         return other
 
     @overload
@@ -294,10 +278,10 @@ class Just(Generic[T], Maybe[T]):
         ...
 
     @overload
-    def __or__(self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
+    def __or__[R](self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
         ...
 
-    def __or__(self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
+    def __or__[R](self, other: Maybe[R]) -> Union[Maybe[T], Maybe[R]]:
         return self
 
     def __eq__(self, other: object) -> bool:
@@ -310,7 +294,7 @@ class Just(Generic[T], Maybe[T]):
         return f"Just({self.value!r})"
 
 
-class Nothing(Generic[T], Maybe[T]):
+class Nothing[T](Maybe[T]):
     __match_args__ = ()
 
     instance: Optional["Nothing[T]"] = None
@@ -320,16 +304,16 @@ class Nothing(Generic[T], Maybe[T]):
             cls.instance = super().__new__(cls)
         return cls.instance
 
-    def map(self, f: Callable[[T], R]) -> "Nothing[R]":
+    def map[R](self, f: Callable[[T], R]) -> "Nothing[R]":
         return Nothing()
 
-    def lift2(self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
+    def lift2[R, U](self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
         return Nothing()
 
-    def bind(self, f: Callable[[T], Maybe[R]]) -> "Nothing[R]":
+    def bind[R](self, f: Callable[[T], Maybe[R]]) -> "Nothing[R]":
         return Nothing()
 
-    def and_then(self, f: Callable[[T], Maybe[R]]) -> "Nothing[R]":
+    def and_then[R](self, f: Callable[[T], Maybe[R]]) -> "Nothing[R]":
         return self.bind(f)
 
     def unwrap(
@@ -345,7 +329,7 @@ class Nothing(Generic[T], Maybe[T]):
     def unwrap_or_else(self, f: Callable[[], T]) -> T:
         return f()
 
-    def filter_typed(self, f: Callable[[T], TypeGuard[R]]) -> "Nothing[R]":
+    def filter_typed[R](self, f: Callable[[T], TypeGuard[R]]) -> "Nothing[R]":
         return Nothing()
 
     def filter(self, f: Callable[[T], bool]) -> "Nothing[T]":
@@ -359,21 +343,21 @@ class Nothing(Generic[T], Maybe[T]):
         ...
 
     @overload
-    def __and__(self, other: "Nothing[R]") -> "Nothing[R]":
+    def __and__[R](self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
-    def __and__(self, other: Maybe[R]) -> Union["Nothing[T]", Maybe[R]]:
+    def __and__[R](self, other: Maybe[R]) -> Union["Nothing[T]", Maybe[R]]:
         return other if isinstance(other, Nothing) else self
 
     @overload
-    def __or__(self, other: "Just[R]") -> "Just[R]":
+    def __or__[R](self, other: "Just[R]") -> "Just[R]":
         ...
 
     @overload
-    def __or__(self, other: "Nothing[R]") -> "Nothing[R]":
+    def __or__[R](self, other: "Nothing[R]") -> "Nothing[R]":
         ...
 
-    def __or__(self, other: Maybe[R]) -> Union["Nothing[T]", Maybe[R]]:
+    def __or__[R](self, other: Maybe[R]) -> Union["Nothing[T]", Maybe[R]]:
         return other
 
     def __eq__(self, other: object) -> bool:

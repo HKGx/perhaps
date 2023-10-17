@@ -106,7 +106,7 @@ def test_from_optional():
 
 def test_to_optional():
     assert Just(1).to_optional() == 1
-    assert Nothing().to_optional() == None
+    assert Nothing().to_optional() is None
 
 
 def test_is_operator():
