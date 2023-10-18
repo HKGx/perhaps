@@ -3,6 +3,8 @@ from typing import Callable, NoReturn, Optional, Tuple, Type, TypeGuard, Union, 
 
 
 class Maybe[T](ABC):
+    __slots__ = ()
+
     value: Union[T, NoReturn]
 
     @abstractmethod
@@ -202,6 +204,7 @@ class Maybe[T](ABC):
 
 class Just[T](Maybe[T]):
     __match_args__ = ("value",)
+    __slots__ = ("value",)
 
     value: T
 
@@ -296,6 +299,7 @@ class Just[T](Maybe[T]):
 
 class Nothing[T](Maybe[T]):
     __match_args__ = ()
+    __slots__ = ()
 
     instance: Optional["Nothing[T]"] = None
 
