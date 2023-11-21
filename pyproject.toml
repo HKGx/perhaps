@@ -11,7 +11,7 @@ license = "MIT"
 name = "perhaps"
 readme = "README.md"
 repository = "https://github.com/HKGx/perhaps"
-version = "0.4.4"
+version = "0.5.1"
 
 [tool.poetry.dependencies]
 python = "^3.12"
