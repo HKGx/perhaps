@@ -24,6 +24,22 @@ class Maybe[T](ABC):
         ...
 
     @abstractmethod
+    def map_nothing(self, f: Callable[[], T]) -> "Just[T]":
+        """
+        Returns new Just, that has a default value if Maybe was Nothing.
+
+        Functionally the same as `Maybe[T] or Just[T]`
+
+        >>> Just(1).map_nothing(lambda: 5)
+        Just(1)
+        >>> Nothing().map_nothing(lambda: 5)
+        Just(5)
+        >>> Maybe.from_optional(None).map_nothing(lambda: 5)
+        Just(5)
+        """
+        ...
+
+    @abstractmethod
     def _lift2[R, U](self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
         """
         Prefer using Maybe.lift2 instead of this method.
@@ -243,6 +259,9 @@ class Just[T](Maybe[T]):
     def map[R](self, f: Callable[[T], R]) -> "Just[R]":
         return Just(f(self.value))
 
+    def map_nothing(self, f: Callable[[], T]) -> "Just[T]":
+        return self or Just(f())
+
     @overload
     def _lift2[R, U](self, f: Callable[[T, R], U], other: "Just[R]") -> "Just[U]":
         ...
@@ -339,6 +358,9 @@ class Nothing[T](Maybe[T]):
 
     def map[R](self, f: Callable[[T], R]) -> "Nothing[R]":
         return Nothing()
+
+    def map_nothing(self, f: Callable[[], T]) -> "Just[T]":
+        return Just(f())
 
     def _lift2[R, U](self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
         return Nothing()

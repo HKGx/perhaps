@@ -26,6 +26,11 @@ def test_map():
     assert Nothing().map(lambda x: x + 1) == Nothing()
 
 
+def test_map_nothing():
+    assert Just(1).map_nothing(lambda: 6) == Just(1)
+    assert Nothing().map_nothing(lambda: 6) == Just(6)
+
+
 def test_lift2():
     assert Just(1)._lift2(lambda x, y: x + y, Just(2)) == Just(3)
     assert (
