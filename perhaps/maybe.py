@@ -24,21 +24,23 @@ class Maybe[T](ABC):
         ...
 
     @abstractmethod
-    def lift2[R, U](self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
+    def _lift2[R, U](self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
         """
+        Prefer using Maybe.lift2 instead of this method.
+
         Given a function that takes two arguments, and another Maybe, apply the
         function to the value of this Maybe and the other Maybe, if they both
         have values.
 
         Analogous to the `Option::zip_wth` in Rust and the `liftA2` in Haskell.
 
-        >>> Just(1).lift2(lambda x, y: x + y, Just(2))
+        >>> Just(1)._lift2(lambda x, y: x + y, Just(2))
         Just(3)
 
-        >>> Just(1).lift2(lambda x, y: x + y, Nothing())
+        >>> Just(1)._lift2(lambda x, y: x + y, Nothing())
         Nothing()
 
-        >>> Nothing().lift2(lambda x, y: x + y, Just(2))
+        >>> Nothing()._lift2(lambda x, y: x + y, Just(2))
         Nothing()
 
         """
@@ -90,14 +92,12 @@ class Maybe[T](ABC):
         """
         Unwrap the value or return the default value.
 
-
         Analogous to `Option::unwrap_or` in Rust.
 
         >>> Just(1).unwrap_or(2)
         1
         >>> Nothing().unwrap_or(2)
         2
-
         """
         ...
 
@@ -201,6 +201,35 @@ class Maybe[T](ABC):
     def __repr__(self) -> str:
         ...
 
+    @staticmethod
+    def lift2[
+        A, B, R
+    ](
+        operation: Callable[[A, B], R],
+    ) -> Callable[
+        ["Maybe[A]", "Maybe[B]"], "Maybe[R]"
+    ]:
+        """
+        Given a binary function and two Maybe objects, apply the function to the values of the Maybe objects, if they both have values.
+
+        This method is analogous to the `Option::zip_with` in Rust and the `liftA2` in Haskell.
+
+        Usage:
+        >>> Maybe.lift2(lambda x, y: x + y)(Just(5), Just(7))
+        Just(12)
+
+        >>> Maybe.lift2(lambda x, y: x + y)(Just(5), Nothing())
+        Nothing()
+
+        >>> Maybe.lift2(lambda x, y: x + y)(Nothing(), Just(7))
+        Nothing()
+        """
+
+        def lifted(left: "Maybe[A]", right: "Maybe[B]") -> "Maybe[R]":
+            return left._lift2(operation, right)
+
+        return lifted
+
 
 class Just[T](Maybe[T]):
     __match_args__ = ("value",)
@@ -215,18 +244,18 @@ class Just[T](Maybe[T]):
         return Just(f(self.value))
 
     @overload
-    def lift2[R, U](self, f: Callable[[T, R], U], other: "Just[R]") -> "Just[U]":
+    def _lift2[R, U](self, f: Callable[[T, R], U], other: "Just[R]") -> "Just[U]":
         ...
 
     @overload
-    def lift2[R, U](self, f: Callable[[T, R], U], other: "Nothing[R]") -> "Nothing[U]":
+    def _lift2[R, U](self, f: Callable[[T, R], U], other: "Nothing[R]") -> "Nothing[U]":
         ...
 
     @overload
-    def lift2[R, U](self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
+    def _lift2[R, U](self, f: Callable[[T, R], U], other: "Maybe[R]") -> "Maybe[U]":
         ...
 
-    def lift2[R, U](self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
+    def _lift2[R, U](self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
         return other.map(lambda x: f(self.value, x))
 
     def bind[R](self, f: Callable[[T], Maybe[R]]) -> Maybe[R]:
@@ -311,7 +340,7 @@ class Nothing[T](Maybe[T]):
     def map[R](self, f: Callable[[T], R]) -> "Nothing[R]":
         return Nothing()
 
-    def lift2[R, U](self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
+    def _lift2[R, U](self, f: Callable[[T, R], U], other: Maybe[R]) -> Maybe[U]:
         return Nothing()
 
     def bind[R](self, f: Callable[[T], Maybe[R]]) -> "Nothing[R]":

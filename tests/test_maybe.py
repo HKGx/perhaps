@@ -27,18 +27,18 @@ def test_map():
 
 
 def test_lift2():
-    assert Just(1).lift2(lambda x, y: x + y, Just(2)) == Just(3)
+    assert Just(1)._lift2(lambda x, y: x + y, Just(2)) == Just(3)
     assert (
-        Just(1).lift2(lambda x, y: x + y, Nothing[int]()) == Nothing()
+        Just(1)._lift2(lambda x, y: x + y, Nothing[int]()) == Nothing()
     )  # annotation for Nothing is required here, though most often it can be inferred
-    assert Nothing().lift2(lambda x, y: x + y, Just(2)) == Nothing()
+    assert Nothing()._lift2(lambda x, y: x + y, Just(2)) == Nothing()
     maybe1 = cast(Maybe[int], Nothing())
-    assert maybe1.lift2(lambda x, y: x + y, Just(2)) == Nothing()
+    assert maybe1._lift2(lambda x, y: x + y, Just(2)) == Nothing()
     maybe2 = cast(Maybe[int], Just(3))
-    assert maybe1.lift2(lambda x, y: x + y, maybe2) == Nothing()
-    assert maybe2.lift2(lambda x, y: x * y, maybe2) == Just(9)
-    assert maybe2.lift2(int.__add__, Just(4)) == Just(7)
-    assert Just("foo").lift2(str.__add__, Just("bar")) == Just("foobar")
+    assert maybe1._lift2(lambda x, y: x + y, maybe2) == Nothing()
+    assert maybe2._lift2(lambda x, y: x * y, maybe2) == Just(9)
+    assert maybe2._lift2(int.__add__, Just(4)) == Just(7)
+    assert Just("foo")._lift2(str.__add__, Just("bar")) == Just("foobar")
 
 
 def test_bind():
